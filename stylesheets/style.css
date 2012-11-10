@@ -3,6 +3,8 @@ body {
   color: #EEE;
   font-family: sans-serif;
   text-align: center;
+
+  margin-top: 10%;
 }
 
 #idea {
@@ -17,6 +19,21 @@ body {
 
 a {
   color: white;
+}
+
+.sharebar {
+  margin-top: 20px;
+}
+
+.fb_iframe_widget span {
+  vertical-align: bottom !important;
+  min-width: 78px !important;
+}
+
+#fal-icon {
+  position: absolute;
+  padding-top: 3px;
+  pointer-events: none;
 }
 
 .btn {
