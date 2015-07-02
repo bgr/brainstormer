@@ -3,44 +3,49 @@
         <title>FTJ Brainstormer</title>
         <link rel="stylesheet" href="stylesheets/style.css" /> 
         <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
-        <script src="lib/jquery.csv-0.7.min.js" type="text/javascript"></script>
-        <script src="lib/array_stuff.js" type="text/javascript"></script>
         <script>
-            var spreadsheetURL = "https://docs.google.com/spreadsheet/pub?key=0AmfuCT5xFzgOdEw0OFJ5dS12Z2U5SUpRY3FEV1dRYXc&single=true&gid=0&output=csv"
-            // load Google Spredsheat data
-            // note: the spreadsheet must be "published" from the Google Docs spreadsheet page
-            $(document).ready(function() {
-                $.ajax({
-                    type: "GET",
-                    url: spreadsheetURL,
-                    dataType: "text",
-                    success: function(data) { 
-                        var table = $.csv.toArrays(data).transpose();
-                        for(var i=0; i<table.length; i++) table[i].clean('');
-                        createElements(table);
-                    }
-                 });
+            var elements = {
+                diversifiers: [],
+                gametypes: [],
+                twists: [],
+            };
 
-            });
-            
-            function createElements(table) {
-                $('#shuffleBtn').show();
-                var brainstorm = function() {
-                    var idea = getIdea(table);
-                    //$("<div id='row'></div>").text(idea).appendTo("#idea");
-                    $("#idea").text(idea);
+            function getAnIdea() {
+                function get(source) {
+                    return source[Math.floor(Math.random() * source.length)];
                 }
-                $('#shuffleBtn').click(brainstorm);
-                brainstorm();
+                return [get(elements.diversifiers), get(elements.gametypes), get(elements.twists)].join(' ');
             }
 
-            function getIdea(ideaSource) {
-                var a = [];
-                for(var row=0; row<3; row++) {
-                    var e = Math.floor(Math.random()*ideaSource[row].clean().length);
-                    a.push(ideaSource[row][e]);
+            function brainstorm() {
+                $("#idea").text(getAnIdea());
+            }
+
+            $(document).ready(function() {
+                $('#shuffleBtn').click(brainstorm);
+
+                $.ajax({
+                    type: 'GET',
+                    dataType: 'jsonp',
+                    url: 'https://spreadsheets.google.com/feeds/list/1AgdN5Xs-_kLlGNXUQYCp-CBoosTRJ_y5VFeDBDeOLpk/od6/public/values?alt=json-in-script&callback=dataCallback',
+                    jsonpCallback: 'dataCallback',
+                });
+
+            });
+
+            function dataCallback(data) {
+                var rows = data.feed.entry;
+                for (var i = 0; i < rows.length; i++) {
+                    var divers = rows[i].gsx$gamediversifier.$t.trim();
+                    var gametype = rows[i].gsx$gametype.$t.trim();
+                    var twist = rows[i].gsx$gametwist.$t.trim();
+
+                    if (divers) elements.diversifiers.push(divers);
+                    if (gametype) elements.gametypes.push(gametype);
+                    if (twist) elements.twists.push(twist);
                 }
-                return a.join(' ');
+                $('#shuffleBtn').show();
+                brainstorm();
             }
         </script>
     </head>
@@ -48,7 +53,7 @@
         <h1>Game Design Brainstormer</h1>
 
         <div id='idea'>Loading ideas...</div>
-        <a href='javascript:void()' class='btn' id='shuffleBtn' style='display:none'>Give me another idea!</a>
+        <a href='javascript:void(0)' class='btn' id='shuffleBtn' style='display:none'>Give me another idea!</a>
 
         <div class='footer'>Powered by YOU! Enrich the brainstormer by adding ideas <a href='https://docs.google.com/spreadsheet/ccc?key=0AmfuCT5xFzgOdEw0OFJ5dS12Z2U5SUpRY3FEV1dRYXc'>here</a></div>
 
